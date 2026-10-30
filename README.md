@@ -43,7 +43,7 @@ cd android && ./gradlew assembleRelease
 `v*` etiketi gönderildiğinde GitHub Actions imzalı APK'yı derleyip Release'e ekler:
 
 ```bash
-git tag v1.2.0 && git push origin v1.2.0
+git tag v1.2.1 && git push origin v1.2.1
 ```
 
 Önce `android/app/build.gradle` içindeki `versionCode` ve `versionName` artırılmalıdır.
