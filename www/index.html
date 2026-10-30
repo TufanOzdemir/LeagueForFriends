@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<title>Puan Tutucu</title>
+<style>
+:root{
+  --bg:#0b1220; --card:#131c2e; --card2:#1a2540; --line:#24314f;
+  --text:#e8eefc; --mut:#8a97b5; --acc:#22c55e; --acc2:#16a34a;
+  --win:#22c55e; --draw:#eab308; --loss:#ef4444; --gold:#fbbf24;
+  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;overscroll-behavior:none}
+body{padding-top:calc(var(--st) + 56px);padding-bottom:calc(var(--sb) + 64px);min-height:100vh}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;outline:none}
+input:focus,select:focus{border-color:var(--acc)}
+header{position:fixed;top:0;left:0;right:0;z-index:10;background:var(--bg);padding:calc(var(--st) + 8px) 14px 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header .logo{font-size:22px}
+#leagueBtn{flex:1;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:700;display:flex;justify-content:space-between;align-items:center;min-width:0}
+#leagueBtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:var(--sb)}
+nav button{flex:1;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mut)}
+nav button i{font-style:normal;font-size:21px;filter:grayscale(1);opacity:.6}
+nav button.on{color:var(--acc)}
+nav button.on i{filter:none;opacity:1}
+main{padding:12px 12px 90px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:18px 4px 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.btn{background:var(--acc);color:#04210f;font-weight:700;border-radius:12px;padding:12px 16px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{background:var(--acc2)}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--loss);border:1px solid #5b2330}
+.btn.block{display:flex;width:100%}
+.row{display:flex;gap:8px;align-items:center}
+.mut{color:var(--mut)} .sm{font-size:12px}
+.empty{text-align:center;padding:36px 16px;color:var(--mut)}
+.empty .big{font-size:46px;margin-bottom:8px}
+.fab{position:fixed;right:16px;bottom:calc(var(--sb) + 76px);z-index:9;width:58px;height:58px;border-radius:50%;background:var(--acc);color:#04210f;font-size:30px;font-weight:700;box-shadow:0 6px 20px #0008;display:flex;align-items:center;justify-content:center}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex:none}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tbl th{font-size:11px;color:var(--mut);font-weight:600;padding:9px 3px;text-align:center;border-bottom:1px solid var(--line)}
+.tbl td{padding:9px 3px;text-align:center;border-bottom:1px solid #1b2640}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.nm,.tbl th.nm{text-align:left;padding-left:8px}
+.tbl td.nm div{display:flex;align-items:center;gap:7px;font-weight:600;max-width:120px}
+.tbl td.nm span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl td.pts{font-weight:800;color:var(--acc);font-size:16px}
+.tbl td.rk{color:var(--mut);width:22px;padding-left:8px}
+.tbl tr.first td.rk{color:var(--gold);font-weight:800}
+.form{display:flex;gap:3px;justify-content:center;margin-top:3px}
+.fb{width:15px;height:15px;border-radius:4px;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;color:#0b1220}
+.fb.G{background:var(--win)} .fb.B{background:var(--draw)} .fb.M{background:var(--loss)}
+
+/* matches */
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 13px;white-space:nowrap;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--acc);color:#04210f;border-color:var(--acc);font-weight:700}
+.match{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 10px;margin-bottom:7px;width:100%}
+.match .h{text-align:right;font-weight:600;min-width:0}
+.match .a{text-align:left;font-weight:600;min-width:0}
+.match .h div,.match .a div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.match .t{font-size:11px;color:var(--mut);font-weight:400}
+.score{min-width:64px;text-align:center;font-weight:800;font-size:18px;background:var(--card2);border-radius:8px;padding:4px 8px;font-variant-numeric:tabular-nums}
+.score.pending{font-size:12px;color:var(--mut);font-weight:600;padding:7px 8px}
+.match .win{color:var(--win)}
+.next{background:linear-gradient(135deg,#123d27,#131c2e);border:1px solid #1f6b40}
+.next .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);font-weight:700;margin-bottom:6px}
+
+/* players */
+.pl{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #1b2640}
+.pl:last-child{border-bottom:0}
+.pl .n{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw{position:relative;width:46px;height:27px;border-radius:999px;background:#2a3757;flex:none;transition:.2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--acc)} .sw.on::after{left:22px}
+
+/* stats */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px}
+.stat .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.stat .v{font-size:20px;font-weight:800;margin-top:2px}
+.stat .s{font-size:12px;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h2h{display:flex;justify-content:space-around;text-align:center;margin-top:12px}
+.h2h .v{font-size:26px;font-weight:800}
+.bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:10px;background:var(--card2)}
+
+/* sheet */
+#sheetWrap{position:fixed;inset:0;z-index:50;display:none}
+#sheetWrap.on{display:block}
+.backdrop{position:absolute;inset:0;background:#000a;animation:fd .2s}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:8px 16px calc(var(--sb) + 18px);animation:up .22s ease-out;border-top:1px solid var(--line)}
+.sheet .grab{width:42px;height:5px;border-radius:9px;background:var(--line);margin:4px auto 10px}
+.sheet h3{margin:4px 0 14px;font-size:18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--mut);margin-bottom:6px;font-weight:600}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fd{from{opacity:0}}
+.scorebox{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;margin:6px 0 16px}
+.side{text-align:center}
+.side .who{font-weight:700;margin-bottom:8px;min-height:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stepper{display:flex;flex-direction:column;align-items:center;gap:6px}
+.stepper button{width:56px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:24px;font-weight:700}
+.stepper button:active{background:var(--line)}
+.stepper .num{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.vs{align-self:center;color:var(--mut);font-weight:800;padding-top:30px}
+.pick{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.pick .chip{font-size:12px;padding:6px 10px}
+.colors{display:flex;flex-wrap:wrap;gap:8px}
+.colors button{width:34px;height:34px;border-radius:50%;border:3px solid transparent}
+.colors button.on{border-color:#fff}
+.seg{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{flex:1;padding:9px 4px;border-radius:9px;font-size:13px;color:var(--mut);font-weight:600}
+.seg button.on{background:var(--acc);color:#04210f}
+.lgrow{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card2);border:1px solid var(--line);margin-bottom:8px}
+.lgrow.on{border-color:var(--acc)}
+.lgrow .n{flex:1;min-width:0}
+.lgrow .n b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+textarea{width:100%;min-height:120px;font:12px monospace;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toast{position:fixed;left:50%;bottom:calc(var(--sb) + 90px);transform:translateX(-50%) translateY(20px);background:#e8eefc;color:#0b1220;padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;transition:.25s;z-index:60;pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.pts3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.pts3 label{text-align:center}
+.money{font-size:16px;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.money.neg{color:var(--loss)}
+.badge{font-size:10px;font-weight:700;background:#2a3757;color:var(--mut);padding:2px 6px;border-radius:99px;vertical-align:middle}
+.roles{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:2px;flex:none}
+.roles button{width:36px;height:30px;border-radius:8px;font-size:15px;color:var(--mut)}
+.roles button.on{background:var(--acc);color:#04210f;font-weight:700}
+.bmt{display:flex;justify-content:space-between;align-items:center;margin:8px 0 10px;font-weight:700;gap:6px}
+.bmt span{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.odds{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.odds button{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.odds button:active{border-color:var(--acc)}
+.odds small{font-size:11px;color:var(--mut);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.odds b{font-size:17px;color:var(--gold)}
+.seg button b{color:var(--gold)} .seg button.on b{color:#04210f}
+.slip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--draw);border-radius:12px;padding:10px 12px;margin-bottom:7px}
+.slip.won{border-left-color:var(--win)} .slip.lost{border-left-color:var(--loss);opacity:.85}
+.slip .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--card2)}
+.slip.won .tag{background:var(--win);color:#04210f} .slip.lost .tag{background:var(--loss);color:#fff} .slip.open .tag{background:var(--draw);color:#04210f}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚽</div>
+  <button id="leagueBtn" data-a="leagues"><span id="lgName">Lig</span><b class="mut">▾</b></button>
+</header>
+<main id="view"></main>
+<nav id="tabs">
+  <button data-tab="table"><i>🏆</i>Puan Durumu</button>
+  <button data-tab="matches"><i>🎮</i>Maçlar</button>
+  <button data-tab="bet"><i>🎲</i>İddia</button>
+  <button data-tab="players"><i>👥</i>Oyuncular</button>
+  <button data-tab="stats"><i>📊</i>İstatistik</button>
+</nav>
+<div id="sheetWrap"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const KEY = 'puantutucu.v1';
+const COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#64748b','#84cc16','#06b6d4'];
+
+let S = load();
+const ui = { tab: 'table', mFilter: 'all', mPlayer: null, h2hA: null, h2hB: null, sheet: null };
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && Array.isArray(d.players) && Array.isArray(d.leagues)) return d;
+  } catch (e) {}
+  return { players: [], leagues: [], activeLeagueId: null };
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
+
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const P = id => S.players.find(p => p.id === id) || { id, name: 'Silinmiş', color: '#555' };
+const L = () => S.leagues.find(l => l.id === S.activeLeagueId);
+const initials = n => n.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toLocaleUpperCase('tr');
+const av = (id, size) => { const p = P(id); return `<span class="av" style="background:${p.color}${size ? `;width:${size}px;height:${size}px;font-size:${Math.round(size * .42)}px` : ''}">${esc(initials(p.name))}</span>`; };
+const fmtDate = t => new Date(t).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1900);
+}
+
+/* ---------- league logic ---------- */
+
+function roundRobin(ids, double) {
+  const a = [...ids]; if (a.length % 2) a.push(null);
+  const n = a.length, rounds = [];
+  for (let r = 0; r < n - 1; r++) {
+    const pairs = [];
+    for (let i = 0; i < n / 2; i++) {
+      let h = a[i], w = a[n - 1 - i];
+      if (!h || !w) continue;
+      if ((i === 0 && r % 2) || (i > 0 && i % 2)) [h, w] = [w, h];
+      pairs.push([h, w]);
+    }
+    rounds.push(pairs);
+    a.splice(1, 0, a.pop());
+  }
+  const out = [];
+  rounds.forEach((pr, ri) => pr.forEach(([h, w]) => out.push(mkMatch(h, w, ri + 1))));
+  if (double) rounds.forEach((pr, ri) => pr.forEach(([h, w]) => out.push(mkMatch(w, h, rounds.length + ri + 1))));
+  return out;
+}
+function mkMatch(home, away, round) { return { id: uid(), home, away, hg: null, ag: null, played: false, round: round ?? null, date: null }; }
+
+function addPlayerToLeague(lg, pid) {
+  if (lg.playerIds.includes(pid)) return;
+  if (lg.format !== 'free') {
+    const maxR = Math.max(0, ...lg.matches.map(m => m.round || 0));
+    lg.playerIds.forEach((o, i) => {
+      const r = maxR + 1 + i;
+      lg.matches.push(i % 2 ? mkMatch(o, pid, r) : mkMatch(pid, o, r));
+      if (lg.format === 'double') lg.matches.push(i % 2 ? mkMatch(pid, o, r + lg.playerIds.length) : mkMatch(o, pid, r + lg.playerIds.length));
+    });
+  }
+  lg.playerIds.push(pid);
+}
+function removePlayerFromLeague(lg, pid) {
+  lg.playerIds = lg.playerIds.filter(x => x !== pid);
+  lg.matches = lg.matches.filter(m => m.home !== pid && m.away !== pid);
+  if (lg.bets) lg.bets = lg.bets.filter(b => b.by !== pid);
+  if (lg.punterIds) lg.punterIds = lg.punterIds.filter(x => x !== pid);
+  if (lg.tx) lg.tx = lg.tx.filter(t => t.from !== pid && t.to !== pid);
+}
+const roleOf = (lg, id) => lg.playerIds.includes(id) ? 'player' : isPunter(lg, id) ? 'punter' : 'none';
+
+function blankRow(id) { return { id, o: 0, g: 0, b: 0, m: 0, ag: 0, yg: 0, p: 0, form: [] }; }
+function playedSorted(matches) { return matches.filter(m => m.played).sort((a, b) => (a.date || 0) - (b.date || 0)); }
+
+function standings(lg) {
+  const pts = lg.points || { w: 3, d: 1, l: 0 };
+  const rows = {};
+  lg.playerIds.forEach(id => rows[id] = blankRow(id));
+  for (const m of playedSorted(lg.matches)) {
+    for (const [me, mg, og] of [[m.home, m.hg, m.ag], [m.away, m.ag, m.hg]]) {
+      const r = rows[me] || (rows[me] = blankRow(me));
+      r.o++; r.ag += mg; r.yg += og;
+      if (mg > og) { r.g++; r.p += pts.w; r.form.push('G'); }
+      else if (mg === og) { r.b++; r.p += pts.d; r.form.push('B'); }
+      else { r.m++; r.p += pts.l; r.form.push('M'); }
+    }
+  }
+  const h2h = (a, b) => {
+    let pa = 0, pb = 0;
+    lg.matches.forEach(m => {
+      if (!m.played) return;
+      if (m.home === a && m.away === b) { pa += m.hg > m.ag ? 3 : m.hg === m.ag ? 1 : 0; pb += m.ag > m.hg ? 3 : m.hg === m.ag ? 1 : 0; }
+      if (m.home === b && m.away === a) { pb += m.hg > m.ag ? 3 : m.hg === m.ag ? 1 : 0; pa += m.ag > m.hg ? 3 : m.hg === m.ag ? 1 : 0; }
+    });
+    return pb - pa;
+  };
+  return Object.values(rows).sort((x, y) =>
+    y.p - x.p || (y.ag - y.yg) - (x.ag - x.yg) || y.ag - x.ag || h2h(x.id, y.id) || P(x.id).name.localeCompare(P(y.id).name, 'tr'));
+}
+
+function nextMatch(lg) {
+  return pendingMatches(lg)[0];
+}
+function pendingMatches(lg) {
+  return lg.matches.filter(m => !m.played).sort((a, b) => (a.round || 0) - (b.round || 0));
+}
+
+/* ---------- betting ---------- */
+
+const money = n => Math.round(n).toLocaleString('tr-TR') + ' ₺';
+const signed = n => (n > 0 ? '+' : '') + money(n);
+const betOn = lg => !!(lg && lg.bet && lg.bet.on);
+
+// 1 / X / 2 odds from standings, goal difference, recent form, home advantage and head-to-head, clamped to 1.10–8.00
+function oddsFor(lg, m, rowsMap) {
+  rowsMap = rowsMap || Object.fromEntries(standings(lg).map(r => [r.id, r]));
+  const wPts = Math.max(1, (lg.points || {}).w || 3);
+  const str = id => {
+    const r = rowsMap[id];
+    if (!r || !r.o) return 0;
+    const ppg = r.p / r.o / wPts * 3;
+    const gd = Math.max(-3, Math.min(3, (r.ag - r.yg) / r.o));
+    const f = r.form.slice(-5);
+    const fp = f.reduce((s, x) => s + (x === 'G' ? 3 : x === 'B' ? 1 : 0), 0) / f.length;
+    return ((ppg - 1.5) * 0.5 + gd * 0.25 + (fp - 1.5) * 0.25) * (r.o / (r.o + 2));
+  };
+  let hp = 0, n = 0;
+  S.leagues.forEach(l => l.matches.forEach(x => {
+    if (!x.played) return;
+    let a, b;
+    if (x.home === m.home && x.away === m.away) [a, b] = [x.hg, x.ag];
+    else if (x.home === m.away && x.away === m.home) [a, b] = [x.ag, x.hg];
+    else return;
+    n++; hp += a > b ? 1 : a < b ? -1 : 0;
+  }));
+  const d = str(m.home) - str(m.away) + 0.15 + (n ? hp / n * 0.3 * n / (n + 2) : 0);
+  const pD = Math.max(0.14, 0.27 * Math.exp(-Math.abs(d) * 0.6));
+  const pH = (1 - pD) / (1 + Math.exp(-1.7 * d));
+  const pA = 1 - pD - pH;
+  const o = p => Math.min(8, Math.max(1.1, Math.round(0.92 / p * 100) / 100));
+  return { '1': o(pH), 'X': o(pD), '2': o(pA) };
+}
+
+function betOutcome(lg, b) {
+  const m = lg.matches.find(x => x.id === b.matchId);
+  if (!m) return { st: 'void' };
+  if (!m.played) return { st: 'open', m };
+  const res = m.hg > m.ag ? '1' : m.hg < m.ag ? '2' : 'X';
+  return res === b.pick ? { st: 'won', m, net: Math.round(b.stake * b.odd) - b.stake } : { st: 'lost', m, net: -b.stake };
+}
+
+// everyone with a wallet: players plus bettors (people who only bet, never play)
+const members = lg => [...lg.playerIds, ...(lg.punterIds || [])];
+const isPunter = (lg, id) => (lg.punterIds || []).includes(id);
+
+function wallets(lg) {
+  const c = lg.bet, w = {};
+  const played = lg.matches.filter(m => m.played);
+  members(lg).forEach(id => w[id] = { id, earn: 0, betNet: 0, open: 0, txNet: 0, bal: 0 });
+  (lg.punterIds || []).forEach(id => { if (w[id]) w[id].earn = played.length * (c.p ?? 100); });
+  played.forEach(m => {
+    for (const [me, mg, og] of [[m.home, m.hg, m.ag], [m.away, m.ag, m.hg]])
+      if (w[me] && !isPunter(lg, me)) w[me].earn += mg > og ? c.w : mg === og ? c.d : c.l;
+  });
+  (lg.bets || []).forEach(b => {
+    const x = w[b.by]; if (!x) return;
+    const o = betOutcome(lg, b);
+    if (o.st === 'open') x.open += b.stake; else if (o.st !== 'void') x.betNet += o.net;
+  });
+  (lg.tx || []).forEach(t => {
+    if (w[t.from]) w[t.from].txNet -= t.amount;
+    if (t.to && w[t.to]) w[t.to].txNet += t.amount;
+  });
+  Object.values(w).forEach(x => x.bal = c.start + x.earn + x.betNet + x.txNet - x.open);
+  return w;
+}
+
+const pickLabel = (m, k) => k === '1' ? P(m.home).name : k === '2' ? P(m.away).name : 'Berabere';
+
+/* ---------- render ---------- */
+
+function render() {
+  const lg = L();
+  $('#lgName').textContent = lg ? lg.name : 'Lig oluştur';
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  const v = $('#view');
+  v.innerHTML = ({ table: vTable, matches: vMatches, bet: vBet, players: vPlayers, stats: vStats })[ui.tab](lg);
+}
+
+function needLeague() {
+  if (!S.players.length) return `<div class="empty"><div class="big">👥</div><p>Hoş geldin! Önce oyuncuları ekle.</p>
+    <button class="btn" data-a="goPlayers">Oyuncu ekle</button></div>`;
+  return `<div class="empty"><div class="big">🏆</div><p>Henüz bir lig yok.</p>
+    <button class="btn" data-a="newLeague">Yeni lig oluştur</button></div>`;
+}
+
+function vTable(lg) {
+  if (!lg) return needLeague();
+  const rows = standings(lg);
+  const nm = nextMatch(lg);
+  const total = lg.matches.length, played = lg.matches.filter(m => m.played).length;
+  let h = '';
+  if (nm) {
+    const o = betOn(lg) && oddsFor(lg, nm);
+    h += `<div class="card next"><div class="lbl">Sıradaki maç${nm.round ? ` · ${nm.round}. Hafta` : ''}</div>
+      ${matchRow(nm, true)}${o ? `<button class="sm mut" data-tab="bet" style="display:block;width:100%;text-align:center;margin-top:6px">🎲 Oranlar: 1 · <b>${o['1'].toFixed(2)}</b> &nbsp; X · <b>${o.X.toFixed(2)}</b> &nbsp; 2 · <b>${o['2'].toFixed(2)}</b></button>` : ''}</div>`;
+  }
+  h += `<div class="tbl"><table><thead><tr><th></th><th class="nm">Oyuncu</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AV</th><th>P</th></tr></thead><tbody>`;
+  rows.forEach((r, i) => {
+    const avg = r.ag - r.yg;
+    h += `<tr class="${i === 0 && r.o ? 'first' : ''}"><td class="rk">${i === 0 && r.o ? '👑' : i + 1}</td>
+      <td class="nm"><div>${av(r.id, 24)}<span class="n">${esc(P(r.id).name)}</span></div>
+        ${r.form.length ? `<div class="form" style="justify-content:flex-start;padding-left:31px">${r.form.slice(-5).map(f => `<span class="fb ${f}">${f}</span>`).join('')}</div>` : ''}</td>
+      <td>${r.o}</td><td>${r.g}</td><td>${r.b}</td><td>${r.m}</td>
+      <td style="color:${avg > 0 ? 'var(--win)' : avg < 0 ? 'var(--loss)' : 'inherit'}">${avg > 0 ? '+' : ''}${avg}</td>
+      <td class="pts">${r.p}</td></tr>`;
+  });
+  h += `</tbody></table></div>
+    <p class="mut sm" style="margin:8px 4px">O: oynanan · G: galibiyet · B: beraberlik · M: mağlubiyet · AV: averaj · P: puan
+    ${lg.format !== 'free' ? `<br>Fikstür: ${played}/${total} maç oynandı` : ''}</p>
+    <div class="row" style="margin-top:10px"><button class="btn ghost block" data-a="share">📤 Tabloyu paylaş</button></div>`;
+  h += `<button class="fab" data-a="addMatch">+</button>`;
+  return h;
+}
+
+function matchRow(m, big) {
+  const ph = P(m.home), pa = P(m.away);
+  const hw = m.played && m.hg > m.ag, aw = m.played && m.ag > m.hg;
+  return `<button class="match" data-a="editMatch" data-id="${m.id}" ${big ? 'style="margin:0;background:transparent;border:0;padding:4px 0"' : ''}>
+    <div class="h ${hw ? 'win' : ''}"><div>${esc(ph.name)}</div>${m.homeTeam ? `<div class="t">${esc(m.homeTeam)}</div>` : ''}</div>
+    ${m.played ? `<div class="score">${m.hg} - ${m.ag}</div>` : `<div class="score pending">${big ? 'Skor gir' : 'vs'}</div>`}
+    <div class="a ${aw ? 'win' : ''}"><div>${esc(pa.name)}</div>${m.awayTeam ? `<div class="t">${esc(m.awayTeam)}</div>` : ''}</div>
+  </button>`;
+}
+
+function vMatches(lg) {
+  if (!lg) return needLeague();
+  const f = ui.mFilter;
+  let ms = lg.matches.filter(m => f === 'all' || (f === 'played' ? m.played : !m.played));
+  if (ui.mPlayer) ms = ms.filter(m => m.home === ui.mPlayer || m.away === ui.mPlayer);
+  let h = `<div class="chips">
+    ${[['all', 'Tümü'], ['played', 'Oynanan'], ['pending', 'Oynanmamış']]
+      .map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="mFilter" data-v="${k}">${t}</button>`).join('')}
+  </div><div class="chips">
+    <button class="chip ${!ui.mPlayer ? 'on' : ''}" data-a="mPlayer" data-v="">Herkes</button>
+    ${lg.playerIds.map(id => `<button class="chip ${ui.mPlayer === id ? 'on' : ''}" data-a="mPlayer" data-v="${id}"><span class="dot" style="background:${P(id).color}"></span>${esc(P(id).name)}</button>`).join('')}
+  </div>`;
+  if (!ms.length) {
+    h += `<div class="empty"><div class="big">🎮</div><p>${lg.matches.length ? 'Bu filtrede maç yok.' : 'Henüz maç yok. Sağ alttaki + ile ilk maçı ekle.'}</p></div>`;
+  } else if (lg.format === 'free') {
+    const pend = ms.filter(m => !m.played);
+    if (pend.length) h += `<h2>Oynanacak</h2>` + pend.map(m => matchRow(m)).join('');
+    const sorted = ms.filter(m => m.played).sort((a, b) => (b.date || 0) - (a.date || 0));
+    let last = '';
+    sorted.forEach(m => {
+      const d = fmtDate(m.date);
+      if (d !== last) { h += `<h2>${d}</h2>`; last = d; }
+      h += matchRow(m);
+    });
+  } else {
+    const byRound = {};
+    ms.forEach(m => (byRound[m.round || 0] ||= []).push(m));
+    Object.keys(byRound).map(Number).sort((a, b) => a - b).forEach(r => {
+      h += `<h2>${r ? r + '. Hafta' : 'Ek maçlar'}</h2>` + byRound[r].map(m => matchRow(m)).join('');
+    });
+  }
+  h += `<button class="fab" data-a="addMatch">+</button>`;
+  return h;
+}
+
+function vPlayers(lg) {
+  let h = `<div class="card"><div class="row">
+      <input id="newPlayer" placeholder="Oyuncu adı" maxlength="20" enterkeyhint="done">
+      <button class="btn" data-a="addPlayer" style="flex:none">Ekle</button></div></div>`;
+  if (!S.players.length) return h + `<div class="empty"><div class="big">👥</div><p>Oyun oynayacak arkadaşlarını ekle.<br>İstediğin kadar kişi ekleyebilirsin.</p></div>`;
+  h += `<h2>${S.players.length} oyuncu${lg ? ` · "${esc(lg.name)}" ligindekiler açık` : ''}</h2><div class="card" style="padding:4px 12px">`;
+  S.players.forEach(p => {
+    const inL = lg && lg.playerIds.includes(p.id);
+    const cnt = S.leagues.reduce((s, l) => s + l.matches.filter(m => m.played && (m.home === p.id || m.away === p.id)).length, 0);
+    const role = lg && roleOf(lg, p.id);
+    const ctl = !lg ? '' : betOn(lg)
+      ? `<div class="roles">${[['none', '—'], ['player', '🎮'], ['punter', '👀']].map(([k, t]) => `<button class="${role === k ? 'on' : ''}" data-a="setRole" data-id="${p.id}" data-v="${k}">${t}</button>`).join('')}</div>`
+      : `<button class="sw ${inL ? 'on' : ''}" data-a="toggleInLeague" data-id="${p.id}" aria-label="Ligde"></button>`;
+    h += `<div class="pl">${av(p.id)}<button class="n" style="text-align:left" data-a="editPlayer" data-id="${p.id}">${esc(p.name)}<div class="mut sm" style="font-weight:400">${role === 'punter' ? 'Bahisçi · ' : ''}${cnt} maç · düzenle ›</div></button>${ctl}</div>`;
+  });
+  h += `</div>`;
+  if (betOn(lg)) h += `<p class="sm mut" style="margin:0 4px">— ligde değil · 🎮 oyuncu · 👀 bahisçi (sadece iddia oynar)</p>`;
+  if (!lg) h += `<button class="btn block" data-a="newLeague" style="margin-top:8px">🏆 Bu oyuncularla lig oluştur</button>`;
+  return h;
+}
+
+function streaks(lg, id) {
+  let bestW = 0, curW = 0, bestU = 0, curU = 0;
+  playedSorted(lg.matches).forEach(m => {
+    if (m.home !== id && m.away !== id) return;
+    const mg = m.home === id ? m.hg : m.ag, og = m.home === id ? m.ag : m.hg;
+    if (mg > og) { curW++; curU++; } else if (mg === og) { curW = 0; curU++; } else { curW = 0; curU = 0; }
+    bestW = Math.max(bestW, curW); bestU = Math.max(bestU, curU);
+  });
+  return { bestW, bestU };
+}
+
+function stat(k, v, s) { return `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s || ''}</div></div>`; }
+
+function vStats(lg) {
+  if (!lg) return needLeague();
+  const played = playedSorted(lg.matches);
+  if (!played.length) return `<div class="empty"><div class="big">📊</div><p>İstatistikler için önce birkaç maç oyna.</p></div>` + allTime();
+  const rows = standings(lg).filter(r => r.o);
+  const goals = played.reduce((s, m) => s + m.hg + m.ag, 0);
+  const topAtk = [...rows].sort((a, b) => b.ag - a.ag)[0];
+  const bestDef = [...rows].sort((a, b) => a.yg / a.o - b.yg / b.o)[0];
+  const bigWin = [...played].sort((a, b) => Math.abs(b.hg - b.ag) - Math.abs(a.hg - a.ag) || (b.hg + b.ag) - (a.hg + a.ag))[0];
+  const mostG = [...played].sort((a, b) => (b.hg + b.ag) - (a.hg + a.ag))[0];
+  const st = rows.map(r => ({ id: r.id, ...streaks(lg, r.id) }));
+  const wS = [...st].sort((a, b) => b.bestW - a.bestW)[0];
+  const uS = [...st].sort((a, b) => b.bestU - a.bestU)[0];
+  const winPct = [...rows].sort((a, b) => b.g / b.o - a.g / a.o)[0];
+  const desc = m => `${esc(P(m.home).name)} ${m.hg}-${m.ag} ${esc(P(m.away).name)}`;
+  let h = `<div class="grid2">
+    ${stat('Maç', played.length, `${goals} gol`)}
+    ${stat('Maç başı gol', (goals / played.length).toFixed(2), '')}
+    ${stat('⚽ Gol kralı', topAtk.ag, esc(P(topAtk.id).name))}
+    ${stat('🧱 En iyi savunma', (bestDef.yg / bestDef.o).toFixed(2), esc(P(bestDef.id).name) + ' · maç başı yenilen')}
+    ${stat('🔥 Galibiyet serisi', wS.bestW, esc(P(wS.id).name))}
+    ${stat('🛡️ Yenilmezlik', uS.bestU, esc(P(uS.id).name) + ' · maç')}
+    ${stat('📈 Galibiyet %', Math.round(winPct.g / winPct.o * 100) + '%', esc(P(winPct.id).name))}
+    ${stat('💥 En farklı', `${Math.max(bigWin.hg, bigWin.ag)}-${Math.min(bigWin.hg, bigWin.ag)}`, desc(bigWin))}
+  </div>
+  <div class="stat" style="margin-top:8px">${`<div class="k">🎆 En gollü maç</div><div class="v">${mostG.hg + mostG.ag} gol</div><div class="s">${desc(mostG)}</div>`}</div>`;
+
+  // head to head
+  const ids = lg.playerIds;
+  if (ids.length >= 2) {
+    const a = ids.includes(ui.h2hA) ? ui.h2hA : ids[0];
+    const b = ids.includes(ui.h2hB) && ui.h2hB !== a ? ui.h2hB : ids.find(x => x !== a);
+    let wa = 0, wb = 0, d = 0, ga = 0, gb = 0;
+    S.leagues.forEach(l => l.matches.forEach(m => {
+      if (!m.played) return;
+      let x, y;
+      if (m.home === a && m.away === b) { x = m.hg; y = m.ag; } else if (m.home === b && m.away === a) { x = m.ag; y = m.hg; } else return;
+      ga += x; gb += y; if (x > y) wa++; else if (y > x) wb++; else d++;
+    }));
+    const tot = wa + wb + d || 1;
+    const opts = sel => ids.map(id => `<option value="${id}" ${id === sel ? 'selected' : ''}>${esc(P(id).name)}</option>`).join('');
+    h += `<h2>⚔️ İkili rekabet (tüm ligler)</h2><div class="card">
+      <div class="row"><select data-ch="h2hA">${opts(a)}</select><b class="mut">vs</b><select data-ch="h2hB">${opts(b)}</select></div>
+      <div class="h2h"><div><div class="v" style="color:var(--win)">${wa}</div><div class="sm mut">${esc(P(a).name)}</div></div>
+        <div><div class="v" style="color:var(--draw)">${d}</div><div class="sm mut">Berabere</div></div>
+        <div><div class="v" style="color:var(--win)">${wb}</div><div class="sm mut">${esc(P(b).name)}</div></div></div>
+      <div class="bar"><div style="width:${wa / tot * 100}%;background:${P(a).color}"></div><div style="width:${d / tot * 100}%;background:#555"></div><div style="width:${wb / tot * 100}%;background:${P(b).color}"></div></div>
+      <p class="sm mut" style="text-align:center;margin:8px 0 0">Goller: ${ga} - ${gb}</p></div>`;
+  }
+  return h + allTime();
+}
+
+function allTime() {
+  if (S.leagues.length < 2) return '';
+  const rows = {};
+  S.leagues.forEach(l => {
+    const pts = l.points || { w: 3, d: 1, l: 0 };
+    l.matches.forEach(m => {
+      if (!m.played) return;
+      for (const [me, mg, og] of [[m.home, m.hg, m.ag], [m.away, m.ag, m.hg]]) {
+        const r = rows[me] || (rows[me] = blankRow(me));
+        r.o++; r.ag += mg; r.yg += og;
+        if (mg > og) { r.g++; r.p += pts.w; } else if (mg === og) { r.b++; r.p += pts.d; } else { r.m++; r.p += pts.l; }
+      }
+    });
+  });
+  const titles = {};
+  S.leagues.forEach(l => { const top = standings(l)[0]; if (top && top.o && l.matches.length && l.matches.every(m => m.played) && l.format !== 'free') titles[top.id] = (titles[top.id] || 0) + 1; });
+  const list = Object.values(rows).sort((x, y) => y.p - x.p || (y.ag - y.yg) - (x.ag - x.yg));
+  if (!list.length) return '';
+  return `<h2>🌍 Tüm zamanlar (${S.leagues.length} lig)</h2><div class="tbl"><table><thead><tr><th class="nm">Oyuncu</th><th>O</th><th>G</th><th>B</th><th>M</th><th>Gol</th><th>%</th><th>P</th></tr></thead><tbody>
+    ${list.map(r => `<tr><td class="nm"><div>${av(r.id, 22)}<span class="n">${esc(P(r.id).name)}${titles[r.id] ? ' ' + '🏆'.repeat(titles[r.id]) : ''}</span></div></td>
+      <td>${r.o}</td><td>${r.g}</td><td>${r.b}</td><td>${r.m}</td><td>${r.ag}:${r.yg}</td><td>${Math.round(r.g / r.o * 100)}</td><td class="pts">${r.p}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function vBet(lg) {
+  if (!lg) return needLeague();
+  if (!betOn(lg)) return `<div class="empty"><div class="big">🎲</div><p>Bu ligde iddia kapalı.<br>Lig ayarlarından açabilirsin.</p>
+    <button class="btn" data-a="editLeague" data-id="${lg.id}">⚙️ Lig ayarları</button></div>`;
+  const w = wallets(lg);
+  let h = `<h2>💰 Kasa <span style="text-transform:none;letter-spacing:0;font-weight:400">· gönder / harca için kişiye dokun</span></h2><div class="card" style="padding:4px 12px">` +
+    Object.values(w).sort((a, b) => b.bal - a.bal).map((x, i) => `<button class="pl" data-a="wallet" data-id="${x.id}" style="width:100%;text-align:left">${av(x.id)}
+      <div class="n">${i === 0 ? '🤑 ' : ''}${esc(P(x.id).name)}${isPunter(lg, x.id) ? ' <span class="badge">Bahisçi</span>' : ''}
+        <div class="mut sm" style="font-weight:400;white-space:normal">Maç ${signed(x.earn)} · İddia ${signed(x.betNet)}${x.txNet ? ` · Transfer ${signed(x.txNet)}` : ''}${x.open ? ` · Açıkta ${money(x.open)}` : ''}</div></div>
+      <b class="money ${x.bal < lg.bet.start ? 'neg' : ''}">${money(x.bal)}</b></button>`).join('') + `</div>
+    <button class="btn ghost block" data-a="addPunter" style="margin-bottom:4px">👀 Bahisçi ekle</button>`;
+
+  const pend = pendingMatches(lg);
+  const rowsMap = Object.fromEntries(standings(lg).map(r => [r.id, r]));
+  h += `<h2>🎯 Oynanacak maçlar</h2>`;
+  if (lg.format === 'free') h += `<button class="btn ghost block" data-a="planMatch" style="margin-bottom:8px">+ Maç ayarla</button>`;
+  if (!pend.length) h += `<p class="mut sm" style="margin:4px">${lg.format === 'free' ? 'İddia oynamak için önce oynanacak bir maç ayarla.' : 'Oynanacak maç kalmadı.'}</p>`;
+  (ui.betAll ? pend : pend.slice(0, 5)).forEach(m => {
+    const o = oddsFor(lg, m, rowsMap);
+    const n = (lg.bets || []).filter(b => b.matchId === m.id).length;
+    h += `<div class="card betm"><div class="row" style="justify-content:space-between"><span class="sm mut">${m.round ? m.round + '. Hafta' : 'Serbest maç'}</span>${n ? `<span class="sm" style="color:var(--acc)">${n} iddia</span>` : ''}</div>
+      <div class="bmt"><span>${av(m.home, 22)} ${esc(P(m.home).name)}</span><span class="mut sm">ev · dep</span><span>${esc(P(m.away).name)} ${av(m.away, 22)}</span></div>
+      <div class="odds">${['1', 'X', '2'].map(k => `<button data-a="bet" data-id="${m.id}" data-v="${k}"><small>${k} · ${esc(pickLabel(m, k))}</small><b>${o[k].toFixed(2)}</b></button>`).join('')}</div></div>`;
+  });
+  if (pend.length > 5) h += `<button class="btn ghost block" data-a="betAll">${ui.betAll ? 'Daha az göster' : `Tüm maçlar (${pend.length})`}</button>`;
+
+  const bets = (lg.bets || []).map(b => ({ b, o: betOutcome(lg, b) })).filter(x => x.o.st !== 'void')
+    .sort((x, y) => (x.o.st === 'open' ? 0 : 1) - (y.o.st === 'open' ? 0 : 1) || y.b.at - x.b.at);
+  if (bets.length) {
+    const lbl = { open: 'Açık', won: 'Kazandı', lost: 'Kaybetti' };
+    h += `<h2>🧾 Kuponlar</h2>` + bets.map(({ b, o }) => `<div class="slip ${o.st}">
+      <div class="row" style="justify-content:space-between">${av(b.by, 22)}<b style="flex:1">${esc(P(b.by).name)}</b><span class="tag">${lbl[o.st]}</span></div>
+      <div class="sm" style="margin:6px 0 2px">${esc(P(o.m.home).name)} – ${esc(P(o.m.away).name)}${o.m.played ? ` <b>(${o.m.hg}-${o.m.ag})</b>` : ''}</div>
+      <div class="row sm mut" style="justify-content:space-between"><span>Tahmin: <b style="color:var(--text)">${b.pick} · ${esc(pickLabel(o.m, b.pick))}</b> @ ${b.odd.toFixed(2)}</span>
+        <span>${money(b.stake)} → ${o.st === 'lost' ? `<b style="color:var(--loss)">${signed(o.net)}</b>` : o.st === 'won' ? `<b style="color:var(--win)">${signed(o.net)}</b>` : `<b style="color:var(--text)">${money(Math.round(b.stake * b.odd))}</b>`}</span></div>
+      ${o.st === 'open' ? `<button class="sm" data-a="cancelBet" data-id="${b.id}" style="color:var(--loss);margin-top:6px">Kuponu iptal et</button>` : ''}</div>`).join('');
+  }
+  const tx = [...(lg.tx || [])].sort((a, b) => b.at - a.at);
+  if (tx.length) {
+    h += `<h2>💸 Hareketler</h2><div class="card" style="padding:4px 12px">` + tx.map(t => `<div class="pl">
+      <span style="font-size:20px">${t.to ? '🔁' : '🛒'}</span>
+      <div class="n" style="white-space:normal">${t.to ? `${esc(P(t.from).name)} → ${esc(P(t.to).name)}` : `${esc(P(t.from).name)} harcadı`}
+        <div class="mut sm" style="font-weight:400">${fmtDate(t.at)}${t.note ? ' · ' + esc(t.note) : ''}</div></div>
+      <b class="money" style="color:${t.to ? 'var(--text)' : 'var(--loss)'}">${money(t.amount)}</b>
+      <button class="chip" data-a="undoTx" data-id="${t.id}" aria-label="Geri al">↩︎</button></div>`).join('') + `</div>`;
+  }
+  return h;
+}
+
+/* ---------- sheets ---------- */
+
+function openSheet(html, onMount) {
+  const w = $('#sheetWrap');
+  w.innerHTML = `<div class="backdrop" data-a="closeSheet"></div><div class="sheet"><div class="grab"></div>${html}</div>`;
+  w.classList.add('on'); ui.sheet = true;
+  onMount && onMount(w.querySelector('.sheet'));
+}
+function closeSheet() { const w = $('#sheetWrap'); w.classList.remove('on'); w.innerHTML = ''; ui.sheet = null; }
+
+function confirmBox(msg, okText = 'Sil') {
+  return new Promise(res => {
+    openSheet(`<h3>${msg}</h3><div class="row"><button class="btn ghost block" id="cNo">Vazgeç</button><button class="btn danger block" id="cYes" style="background:var(--loss);color:#fff">${okText}</button></div>`, s => {
+      s.querySelector('#cNo').onclick = () => { closeSheet(); res(false); };
+      s.querySelector('#cYes').onclick = () => { closeSheet(); res(true); };
+    });
+  });
+}
+
+function teamList() {
+  const set = new Set();
+  S.leagues.forEach(l => l.matches.forEach(m => { m.homeTeam && set.add(m.homeTeam); m.awayTeam && set.add(m.awayTeam); }));
+  return [...set];
+}
+
+function matchSheet(existing) {
+  const lg = L();
+  if (lg.playerIds.length < 2) { toast('Ligde en az 2 oyuncu olmalı'); return; }
+  const fixed = existing && (lg.format !== 'free' || !existing.played);
+  const st = existing
+    ? { home: existing.home, away: existing.away, hg: existing.played ? existing.hg : 0, ag: existing.played ? existing.ag : 0, ht: existing.homeTeam || '', at: existing.awayTeam || '' }
+    : { home: null, away: null, hg: 0, ag: 0, ht: '', at: '' };
+  const teams = teamList();
+  const pickHtml = side => `<div class="pick" data-side="${side}">${lg.playerIds.map(id => `<button class="chip" data-p="${id}">${esc(P(id).name)}</button>`).join('')}</div>`;
+  openSheet(`<h3>${existing ? (existing.played ? 'Maçı düzenle' : 'Skoru gir') : 'Yeni maç'}</h3>
+    <datalist id="teams">${teams.map(t => `<option value="${esc(t)}">`).join('')}</datalist>
+    <div class="scorebox">
+      <div class="side"><div class="who" id="whoH"></div>${fixed ? '' : pickHtml('home')}
+        <div class="stepper" style="margin-top:10px"><button data-st="hg+1">+</button><div class="num" id="hg"></div><button data-st="hg-1">−</button></div>
+        <input id="ht" list="teams" placeholder="Takım (ops.)" value="${esc(st.ht)}" style="margin-top:10px;text-align:center;padding:8px"></div>
+      <div class="vs">VS</div>
+      <div class="side"><div class="who" id="whoA"></div>${fixed ? '' : pickHtml('away')}
+        <div class="stepper" style="margin-top:10px"><button data-st="ag+1">+</button><div class="num" id="ag"></div><button data-st="ag-1">−</button></div>
+        <input id="at" list="teams" placeholder="Takım (ops.)" value="${esc(st.at)}" style="margin-top:10px;text-align:center;padding:8px"></div>
+    </div>
+    <button class="btn block" id="saveM">Kaydet</button>
+    ${existing && existing.played ? `<button class="btn danger block" id="delM" style="margin-top:8px">${lg.format === 'free' ? 'Maçı sil' : 'Skoru sıfırla'}</button>` : ''}
+    ${existing && !existing.played && lg.format === 'free' ? `<button class="btn danger block" id="delM" style="margin-top:8px">Maçı sil</button>` : ''}`,
+  s => {
+    const paint = () => {
+      s.querySelector('#hg').textContent = st.hg; s.querySelector('#ag').textContent = st.ag;
+      s.querySelector('#whoH').textContent = st.home ? P(st.home).name : 'Ev sahibi';
+      s.querySelector('#whoA').textContent = st.away ? P(st.away).name : 'Deplasman';
+      s.querySelectorAll('.pick').forEach(pk => pk.querySelectorAll('.chip').forEach(c => {
+        const side = pk.dataset.side, other = side === 'home' ? st.away : st.home;
+        c.classList.toggle('on', st[side] === c.dataset.p);
+        c.style.opacity = other === c.dataset.p ? .3 : 1;
+      }));
+    };
+    s.addEventListener('click', e => {
+      const c = e.target.closest('[data-p]');
+      if (c) { const side = c.closest('.pick').dataset.side, other = side === 'home' ? 'away' : 'home'; if (st[other] === c.dataset.p) st[other] = st[side]; st[side] = c.dataset.p; paint(); return; }
+      const b = e.target.closest('[data-st]');
+      if (b) { const [k, d] = [b.dataset.st.slice(0, 2), +b.dataset.st.slice(2)]; st[k] = Math.max(0, Math.min(99, st[k] + d)); paint(); }
+    });
+    s.querySelector('#saveM').onclick = () => {
+      if (!st.home || !st.away) { toast('İki oyuncuyu da seç'); return; }
+      const ht = s.querySelector('#ht').value.trim(), at = s.querySelector('#at').value.trim();
+      let m = existing, swapped = false;
+      if (!m) {
+        // fill a pending match between these two if one exists
+        const pend = pendingMatches(lg);
+        m = pend.find(x => x.home === st.home && x.away === st.away);
+        if (!m) { const r = pend.find(x => x.home === st.away && x.away === st.home); if (r) { m = r; swapped = true; [st.home, st.away, st.hg, st.ag] = [st.away, st.home, st.ag, st.hg]; } }
+      }
+      if (!m) { m = mkMatch(st.home, st.away, null); lg.matches.push(m); }
+      Object.assign(m, { home: st.home, away: st.away, hg: st.hg, ag: st.ag, played: true, date: m.date || Date.now(),
+        homeTeam: swapped ? at : ht, awayTeam: swapped ? ht : at });
+      save(); closeSheet(); render(); toast('Maç kaydedildi ✅');
+    };
+    const del = s.querySelector('#delM');
+    if (del) del.onclick = async () => {
+      const nb = (lg.bets || []).filter(b => b.matchId === existing.id).length;
+      const note = nb ? `<br><span class="sm mut">Bu maça oynanan ${nb} iddia ${lg.format === 'free' ? 'iptal edilip para iade edilecek' : 'tekrar açık duruma geçecek'}.</span>` : '';
+      if (!(await confirmBox((lg.format === 'free' ? 'Bu maç silinsin mi?' : 'Skor sıfırlansın mı?') + note, lg.format === 'free' ? 'Sil' : 'Sıfırla'))) return;
+      if (lg.format === 'free') { lg.matches = lg.matches.filter(x => x !== existing); if (lg.bets) lg.bets = lg.bets.filter(b => b.matchId !== existing.id); }
+      else Object.assign(existing, { hg: null, ag: null, played: false, date: null, homeTeam: '', awayTeam: '' });
+      save(); render(); toast('Tamam');
+    };
+    paint();
+  });
+}
+
+function playerSheet(p) {
+  let color = p.color;
+  openSheet(`<h3>Oyuncu</h3>
+    <div class="field"><label>Ad</label><input id="pn" value="${esc(p.name)}" maxlength="20"></div>
+    <div class="field"><label>Renk</label><div class="colors">${COLORS.map(c => `<button data-c="${c}" style="background:${c}" class="${c === color ? 'on' : ''}"></button>`).join('')}</div></div>
+    <button class="btn block" id="sv">Kaydet</button>
+    <button class="btn danger block" id="dl" style="margin-top:8px">Oyuncuyu sil</button>`, s => {
+    s.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { color = b.dataset.c; s.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', x === b)); });
+    s.querySelector('#sv').onclick = () => {
+      const n = s.querySelector('#pn').value.trim();
+      if (!n) return toast('Ad boş olamaz');
+      p.name = n; p.color = color; save(); closeSheet(); render();
+    };
+    s.querySelector('#dl').onclick = async () => {
+      const cnt = S.leagues.reduce((x, l) => x + l.matches.filter(m => m.played && (m.home === p.id || m.away === p.id)).length, 0);
+      if (!(await confirmBox(`${esc(p.name)} silinsin mi?${cnt ? `<br><span class="sm mut">Oynadığı ${cnt} maç da tüm liglerden silinecek.</span>` : ''}`))) return;
+      S.leagues.forEach(l => removePlayerFromLeague(l, p.id));
+      S.players = S.players.filter(x => x !== p);
+      save(); render(); toast('Silindi');
+    };
+  });
+}
+
+function newLeagueSheet() {
+  if (S.players.length < 2) { toast('Önce en az 2 oyuncu ekle'); ui.tab = 'players'; closeSheet(); render(); return; }
+  const sel = new Set(S.players.map(p => p.id));
+  let format = 'double';
+  const n = S.leagues.length + 1;
+  openSheet(`<h3>Yeni lig</h3>
+    <div class="field"><label>Lig adı</label><input id="ln" value="Sezon ${n}" maxlength="30"></div>
+    <div class="field"><label>Oyuncular</label><div class="chips" style="flex-wrap:wrap">${S.players.map(p => `<button class="chip on" data-p="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('')}</div></div>
+    <div class="field"><label>Format</label><div class="seg">
+      <button data-f="double" class="on">Çift devre</button><button data-f="single">Tek devre</button><button data-f="free">Serbest</button></div>
+      <p class="sm mut" id="fdesc" style="margin:6px 2px 0"></p></div>
+    <div class="field"><label>Puanlama</label><div class="pts3">
+      <label>Galibiyet<input id="pw" type="number" inputmode="numeric" value="3"></label>
+      <label>Beraberlik<input id="pd" type="number" inputmode="numeric" value="1"></label>
+      <label>Mağlubiyet<input id="pl" type="number" inputmode="numeric" value="0"></label></div></div>
+    ${betCfgHtml()}
+    <button class="btn block" id="cr">Ligi başlat 🏁</button>`, s => {
+    mountBetCfg(s);
+    const desc = () => {
+      const k = sel.size, per = k * (k - 1) / 2;
+      s.querySelector('#fdesc').textContent = format === 'free'
+        ? 'Fikstür yok; istediğiniz kişiler istediği kadar maç yapar.'
+        : `Herkes birbiriyle ${format === 'double' ? '2 kez (rövanşlı)' : '1 kez'} oynar · toplam ${format === 'double' ? per * 2 : per} maç`;
+    };
+    s.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { sel.has(b.dataset.p) ? sel.delete(b.dataset.p) : sel.add(b.dataset.p); b.classList.toggle('on'); desc(); });
+    s.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { format = b.dataset.f; s.querySelectorAll('[data-f]').forEach(x => x.classList.toggle('on', x === b)); desc(); });
+    s.querySelector('#cr').onclick = () => {
+      if (sel.size < 2) return toast('En az 2 oyuncu seç');
+      const ids = S.players.filter(p => sel.has(p.id)).map(p => p.id);
+      const num = id => { const v = parseInt(s.querySelector(id).value, 10); return isNaN(v) ? 0 : v; };
+      const lg = { id: uid(), name: s.querySelector('#ln').value.trim() || `Sezon ${n}`, createdAt: Date.now(), format, playerIds: ids,
+        points: { w: num('#pw'), d: num('#pd'), l: num('#pl') }, bet: readBetCfg(s), bets: [],
+        matches: format === 'free' ? [] : roundRobin([...ids].sort(() => Math.random() - .5), format === 'double') };
+      S.leagues.push(lg); S.activeLeagueId = lg.id; save();
+      closeSheet(); ui.tab = 'table'; ui.mPlayer = null; render(); toast('Lig başladı! ⚽');
+    };
+    desc();
+  });
+}
+
+function leaguesSheet() {
+  const fmt = { free: 'Serbest', single: 'Tek devre', double: 'Çift devre' };
+  openSheet(`<h3>Ligler</h3>
+    ${S.leagues.length ? [...S.leagues].reverse().map(l => {
+      const top = standings(l)[0];
+      return `<div class="lgrow ${l.id === S.activeLeagueId ? 'on' : ''}">
+        <button class="n" style="text-align:left" data-a="pickLeague" data-id="${l.id}"><b>${esc(l.name)}</b>
+          <span class="sm mut">${fmt[l.format]} · ${l.playerIds.length} oyuncu · ${l.matches.filter(m => m.played).length} maç${top && top.o ? ` · lider ${esc(P(top.id).name)}` : ''}</span></button>
+        <button class="chip" data-a="editLeague" data-id="${l.id}">⚙️</button></div>`;
+    }).join('') : '<p class="mut">Henüz lig yok.</p>'}
+    <button class="btn block" data-a="newLeague" style="margin-top:6px">+ Yeni lig</button>
+    <h2>Yedekleme</h2>
+    <div class="row"><button class="btn ghost block" data-a="export">Dışa aktar</button><button class="btn ghost block" data-a="import">İçe aktar</button></div>`);
+}
+
+function editLeagueSheet(lg) {
+  openSheet(`<h3>Lig ayarları</h3>
+    <div class="field"><label>Lig adı</label><input id="ln" value="${esc(lg.name)}" maxlength="30"></div>
+    <div class="field"><label>Puanlama (G / B / M)</label><div class="pts3">
+      <input id="pw" type="number" value="${lg.points.w}"><input id="pd" type="number" value="${lg.points.d}"><input id="pl" type="number" value="${lg.points.l}"></div></div>
+    ${betCfgHtml(lg.bet)}
+    <p class="sm mut">Oyuncu eklemek/çıkarmak için Oyuncular sekmesindeki anahtarları kullan. Fikstürlü ligde yeni oyuncunun maçları otomatik eklenir.</p>
+    <button class="btn block" id="sv">Kaydet</button>
+    <button class="btn danger block" id="dl" style="margin-top:8px">Ligi sil</button>`, s => {
+    mountBetCfg(s);
+    s.querySelector('#sv').onclick = () => {
+      lg.bet = readBetCfg(s); lg.bets ||= [];
+      const num = id => { const v = parseInt(s.querySelector(id).value, 10); return isNaN(v) ? 0 : v; };
+      lg.name = s.querySelector('#ln').value.trim() || lg.name;
+      lg.points = { w: num('#pw'), d: num('#pd'), l: num('#pl') };
+      save(); closeSheet(); render(); toast('Kaydedildi');
+    };
+    s.querySelector('#dl').onclick = async () => {
+      if (!(await confirmBox(`"${esc(lg.name)}" ve tüm maçları silinsin mi?`))) return;
+      S.leagues = S.leagues.filter(x => x !== lg);
+      if (S.activeLeagueId === lg.id) S.activeLeagueId = S.leagues.at(-1)?.id || null;
+      save(); render(); toast('Lig silindi');
+    };
+  });
+}
+
+function betSheet(m, pick) {
+  const lg = L(), w = wallets(lg), odds = oddsFor(lg, m);
+  let by = members(lg).includes(ui.lastBettor) ? ui.lastBettor : members(lg)[0];
+  openSheet(`<h3>🎲 İddia oyna</h3>
+    <div class="card" style="background:var(--card2);text-align:center"><b>${esc(P(m.home).name)}</b> <span class="mut">vs</span> <b>${esc(P(m.away).name)}</b>
+      <div class="sm mut">${m.round ? m.round + '. Hafta' : 'Serbest maç'}</div></div>
+    <div class="field"><label>Tahmin</label><div class="seg" id="pk">${['1', 'X', '2'].map(k => `<button data-k="${k}">${k} · ${esc(pickLabel(m, k))}<br><b>${odds[k].toFixed(2)}</b></button>`).join('')}</div></div>
+    <div class="field"><label>Kim oynuyor?</label><div class="chips" id="by" style="flex-wrap:wrap">${members(lg).map(id =>
+      `<button class="chip" data-p="${id}"><span class="dot" style="background:${P(id).color}"></span>${esc(P(id).name)} · ${money(w[id].bal)}</button>`).join('')}</div></div>
+    <div class="field"><label>Miktar</label><input id="stk" type="number" inputmode="numeric" min="1" placeholder="0">
+      <div class="chips" style="margin-top:8px">${[50, 100, 250, 500].map(v => `<button class="chip" data-q="${v}">${v}</button>`).join('')}<button class="chip" data-q="all">Hepsi</button></div></div>
+    <div class="card" style="background:var(--card2);display:flex;justify-content:space-between;align-items:center"><span class="mut">Olası kazanç</span><b id="pot" style="font-size:20px;color:var(--acc)">0 ₺</b></div>
+    <button class="btn block" id="ok">Kuponu yatır</button>`, s => {
+    const stk = s.querySelector('#stk');
+    const paint = () => {
+      s.querySelectorAll('#pk button').forEach(b => b.classList.toggle('on', b.dataset.k === pick));
+      s.querySelectorAll('#by .chip').forEach(c => c.classList.toggle('on', c.dataset.p === by));
+      s.querySelector('#pot').textContent = money((parseInt(stk.value, 10) || 0) * odds[pick]);
+    };
+    s.querySelectorAll('#pk button').forEach(b => b.onclick = () => { pick = b.dataset.k; paint(); });
+    s.querySelectorAll('#by .chip').forEach(c => c.onclick = () => { by = c.dataset.p; paint(); });
+    s.querySelectorAll('[data-q]').forEach(c => c.onclick = () => { stk.value = c.dataset.q === 'all' ? Math.max(0, Math.floor(w[by].bal)) : c.dataset.q; paint(); });
+    stk.oninput = paint;
+    s.querySelector('#ok').onclick = () => {
+      const stake = parseInt(stk.value, 10) || 0;
+      if (stake <= 0) return toast('Miktar gir');
+      if (stake > w[by].bal) return toast(`${P(by).name} kasasında ${money(w[by].bal)} var`);
+      if ((lg.bets ||= []).some(b => b.matchId === m.id && b.by === by)) return toast(`${P(by).name} bu maça zaten iddia oynadı`);
+      lg.bets.push({ id: uid(), matchId: m.id, by, pick, stake, odd: odds[pick], at: Date.now() });
+      ui.lastBettor = by;
+      save(); closeSheet(); render(); toast('Kupon yatırıldı 🎟️');
+    };
+    paint();
+  });
+}
+
+function walletSheet(id) {
+  const lg = L(), x = wallets(lg)[id];
+  const others = members(lg).filter(o => o !== id);
+  let mode = 'send', to = null;
+  openSheet(`<div class="row" style="gap:10px;margin:4px 0 6px">${av(id, 40)}<div><h3 style="margin:0">${esc(P(id).name)}</h3>
+      <div class="sm mut">${isPunter(lg, id) ? 'Bahisçi' : 'Oyuncu'}</div></div><b class="money" style="margin-left:auto;font-size:22px">${money(x.bal)}</b></div>
+    <p class="sm mut" style="margin:0 0 12px">Başlangıç ${money(lg.bet.start)} · Maç ${signed(x.earn)} · İddia ${signed(x.betNet)} · Transfer ${signed(x.txNet)}${x.open ? ` · Açıkta ${money(x.open)}` : ''}</p>
+    <div class="seg" id="md" style="margin-bottom:14px"><button data-m="send">🔁 Para gönder</button><button data-m="spend">🛒 Para harca</button></div>
+    <div class="field" id="toF"><label>Kime?</label><div class="chips" id="to" style="flex-wrap:wrap">${others.map(o =>
+      `<button class="chip" data-p="${o}"><span class="dot" style="background:${P(o).color}"></span>${esc(P(o).name)}</button>`).join('')}</div></div>
+    <div class="field"><label>Miktar</label><input id="amt" type="number" inputmode="numeric" min="1" placeholder="0">
+      <div class="chips" style="margin-top:8px">${[50, 100, 250, 500].map(v => `<button class="chip" data-q="${v}">${v}</button>`).join('')}<button class="chip" data-q="all">Hepsi</button></div></div>
+    <div class="field"><label>Not (isteğe bağlı)</label><input id="note" maxlength="40" placeholder=""></div>
+    <button class="btn block" id="ok"></button>`, s => {
+    const paint = () => {
+      s.querySelectorAll('#md button').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+      s.querySelector('#toF').style.display = mode === 'send' ? 'block' : 'none';
+      s.querySelectorAll('#to .chip').forEach(c => c.classList.toggle('on', c.dataset.p === to));
+      s.querySelector('#note').placeholder = mode === 'send' ? 'ör. borç ödemesi' : 'ör. kola, pizza, yeni kol';
+      s.querySelector('#ok').textContent = mode === 'send' ? 'Gönder' : 'Harca';
+    };
+    s.querySelectorAll('#md button').forEach(b => b.onclick = () => { mode = b.dataset.m; paint(); });
+    s.querySelectorAll('#to .chip').forEach(c => c.onclick = () => { to = c.dataset.p; paint(); });
+    s.querySelectorAll('[data-q]').forEach(c => c.onclick = () => { s.querySelector('#amt').value = c.dataset.q === 'all' ? Math.max(0, Math.floor(x.bal)) : c.dataset.q; });
+    s.querySelector('#ok').onclick = () => {
+      const amount = parseInt(s.querySelector('#amt').value, 10) || 0;
+      if (mode === 'send' && !to) return toast('Kime göndereceğini seç');
+      if (amount <= 0) return toast('Miktar gir');
+      if (amount > x.bal) return toast(`Kasada ${money(x.bal)} var`);
+      (lg.tx ||= []).push({ id: uid(), from: id, to: mode === 'send' ? to : null, amount, note: s.querySelector('#note').value.trim(), at: Date.now() });
+      save(); closeSheet(); render();
+      toast(mode === 'send' ? `${money(amount)} → ${P(to).name} 🔁` : `${money(amount)} harcandı 🛒`);
+    };
+    paint();
+  });
+}
+
+function addPunterSheet() {
+  const lg = L();
+  const avail = S.players.filter(p => roleOf(lg, p.id) === 'none');
+  openSheet(`<h3>👀 Bahisçi ekle</h3>
+    <p class="sm mut" style="margin-top:-6px">Bahisçiler maç yapmaz; iddia oynar ve oynanan her maç için ${money(lg.bet.p ?? 100)} kazanır.</p>
+    ${avail.length ? `<div class="field"><label>Mevcut kişilerden</label><div class="chips" style="flex-wrap:wrap">${avail.map(p =>
+      `<button class="chip" data-p="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('')}</div></div>` : ''}
+    <div class="field"><label>Yeni kişi</label><div class="row"><input id="pn" placeholder="Ad" maxlength="20"><button class="btn" id="ok" style="flex:none">Ekle</button></div></div>`, s => {
+    const done = pid => { (lg.punterIds ||= []).push(pid); save(); closeSheet(); render(); toast(`${P(pid).name} bahisçi oldu 👀`); };
+    s.querySelectorAll('[data-p]').forEach(c => c.onclick = () => done(c.dataset.p));
+    s.querySelector('#ok').onclick = () => {
+      const n = s.querySelector('#pn').value.trim();
+      if (!n) return toast('Ad gir');
+      if (S.players.some(p => p.name.toLocaleLowerCase('tr') === n.toLocaleLowerCase('tr'))) return toast('Bu isim zaten var');
+      const used = S.players.map(p => p.color);
+      const p = { id: uid(), name: n, color: COLORS.find(c => !used.includes(c)) || COLORS[S.players.length % COLORS.length] };
+      S.players.push(p); done(p.id);
+    };
+  });
+}
+
+async function setRole(lg, id, role) {
+  const cur = roleOf(lg, id);
+  if (cur === role) return;
+  const name = esc(P(id).name);
+  if (cur === 'player') {
+    const cnt = lg.matches.filter(m => m.played && (m.home === id || m.away === id)).length;
+    if (cnt && !(await confirmBox(`${name} artık maç yapmayacak mı?<br><span class="sm mut">Bu ligdeki ${cnt} maçı silinecek.</span>`, 'Devam'))) return;
+    lg.playerIds = lg.playerIds.filter(x => x !== id);
+    lg.matches = lg.matches.filter(m => m.home !== id && m.away !== id);
+  }
+  if (cur === 'punter') lg.punterIds = lg.punterIds.filter(x => x !== id);
+  if (role === 'none') {
+    const n = (lg.bets || []).filter(b => b.by === id).length + (lg.tx || []).filter(t => t.from === id || t.to === id).length;
+    if (n && !(await confirmBox(`${name} ligden çıkarılsın mı?<br><span class="sm mut">Kuponları ve para hareketleri silinecek.</span>`, 'Çıkar'))) { render(); return; }
+    removePlayerFromLeague(lg, id);
+  }
+  if (role === 'player') { addPlayerToLeague(lg, id); toast(lg.format === 'free' ? 'Oyuncu olarak eklendi' : 'Oyuncu olarak eklendi, maçları fikstüre eklendi'); }
+  if (role === 'punter') { (lg.punterIds ||= []).push(id); toast('Bahisçi olarak eklendi 👀'); }
+  save(); render();
+}
+
+function planMatchSheet() {
+  const lg = L();
+  if (lg.playerIds.length < 2) return toast('Ligde en az 2 oyuncu olmalı');
+  const st = { home: null, away: null };
+  const pick = side => `<div class="field"><label>${side === 'home' ? 'Ev sahibi' : 'Deplasman'}</label><div class="chips" data-side="${side}" style="flex-wrap:wrap">${lg.playerIds.map(id => `<button class="chip" data-p="${id}">${esc(P(id).name)}</button>`).join('')}</div></div>`;
+  openSheet(`<h3>Maç ayarla</h3>${pick('home')}${pick('away')}<button class="btn block" id="ok">Oluştur</button>`, s => {
+    const paint = () => s.querySelectorAll('[data-side]').forEach(g => g.querySelectorAll('.chip').forEach(c => {
+      c.classList.toggle('on', st[g.dataset.side] === c.dataset.p);
+      c.style.opacity = st[g.dataset.side === 'home' ? 'away' : 'home'] === c.dataset.p ? .3 : 1;
+    }));
+    s.querySelectorAll('[data-side] .chip').forEach(c => c.onclick = () => {
+      const side = c.closest('[data-side]').dataset.side, other = side === 'home' ? 'away' : 'home';
+      if (st[other] === c.dataset.p) st[other] = st[side];
+      st[side] = c.dataset.p; paint();
+    });
+    s.querySelector('#ok').onclick = () => {
+      if (!st.home || !st.away) return toast('İki oyuncuyu da seç');
+      lg.matches.push(mkMatch(st.home, st.away, null));
+      save(); closeSheet(); render(); toast('Maç ayarlandı, iddialar açık');
+    };
+  });
+}
+
+function betCfgHtml(c) {
+  c = c || { on: false, start: 1000, w: 100, d: 50, l: 20 };
+  return `<div class="field"><div class="row" style="justify-content:space-between"><label style="margin:0">🎲 İddia modu</label>
+      <button class="sw ${c.on ? 'on' : ''}" id="betOn" aria-label="İddia modu"></button></div>
+    <div id="betCfg" style="display:${c.on ? 'block' : 'none'};margin-top:10px">
+      <label>Başlangıç parası</label><input id="bs" type="number" inputmode="numeric" value="${c.start}">
+      <label style="margin-top:10px">Maç başına kazanılan para</label><div class="pts3">
+        <label>Galibiyet<input id="bw" type="number" inputmode="numeric" value="${c.w}"></label>
+        <label>Beraberlik<input id="bd" type="number" inputmode="numeric" value="${c.d}"></label>
+        <label>Mağlubiyet<input id="bl" type="number" inputmode="numeric" value="${c.l}"></label></div>
+      <label style="margin-top:10px">Bahisçilerin maç başı kazancı</label><input id="bp" type="number" inputmode="numeric" value="${c.p ?? 100}"></div></div>`;
+}
+function mountBetCfg(s) {
+  const t = s.querySelector('#betOn');
+  t.onclick = () => { t.classList.toggle('on'); s.querySelector('#betCfg').style.display = t.classList.contains('on') ? 'block' : 'none'; };
+}
+function readBetCfg(s) {
+  const num = id => { const v = parseInt(s.querySelector(id).value, 10); return isNaN(v) ? 0 : Math.max(0, v); };
+  return { on: s.querySelector('#betOn').classList.contains('on'), start: num('#bs'), w: num('#bw'), d: num('#bd'), l: num('#bl'), p: num('#bp') };
+}
+
+async function shareText(text, title) {
+  const Share = window.Capacitor?.Plugins?.Share;
+  try {
+    if (Share) { await Share.share({ title, text, dialogTitle: title }); return; }
+    if (navigator.share) { await navigator.share({ title, text }); return; }
+  } catch (e) { if (String(e).includes('cancel')) return; }
+  try { await navigator.clipboard.writeText(text); toast('Panoya kopyalandı'); }
+  catch (e) { openSheet(`<h3>${esc(title)}</h3><textarea readonly>${esc(text)}</textarea>`); }
+}
+
+function shareTable() {
+  const lg = L(); const rows = standings(lg);
+  const medal = ['🥇', '🥈', '🥉'];
+  const lines = rows.map((r, i) => `${medal[i] || (i + 1) + '.'} ${P(r.id).name} — ${r.p} P (${r.g}G ${r.b}B ${r.m}M, ${r.ag}:${r.yg})`);
+  shareText(`⚽ ${lg.name} – Puan Durumu\n\n${lines.join('\n')}`, lg.name);
+}
+
+/* ---------- events ---------- */
+
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-tab],[data-a]');
+  if (!t) return;
+  if (t.dataset.tab) { ui.tab = t.dataset.tab; render(); window.scrollTo(0, 0); return; }
+  const a = t.dataset.a, id = t.dataset.id, lg = L();
+  switch (a) {
+    case 'closeSheet': closeSheet(); break;
+    case 'leagues': leaguesSheet(); break;
+    case 'newLeague': newLeagueSheet(); break;
+    case 'goPlayers': ui.tab = 'players'; render(); setTimeout(() => $('#newPlayer')?.focus(), 50); break;
+    case 'pickLeague': S.activeLeagueId = id; ui.mPlayer = null; save(); closeSheet(); render(); break;
+    case 'editLeague': editLeagueSheet(S.leagues.find(l => l.id === id)); break;
+    case 'addMatch': matchSheet(null); break;
+    case 'editMatch': matchSheet(lg.matches.find(m => m.id === id)); break;
+    case 'mFilter': ui.mFilter = t.dataset.v; render(); break;
+    case 'mPlayer': ui.mPlayer = t.dataset.v || null; render(); break;
+    case 'addPlayer': addPlayer(); break;
+    case 'editPlayer': playerSheet(S.players.find(p => p.id === id)); break;
+    case 'share': shareTable(); break;
+    case 'bet': betSheet(lg.matches.find(m => m.id === id), t.dataset.v); break;
+    case 'betAll': ui.betAll = !ui.betAll; render(); break;
+    case 'planMatch': planMatchSheet(); break;
+    case 'wallet': walletSheet(id); break;
+    case 'addPunter': addPunterSheet(); break;
+    case 'setRole': setRole(lg, id, t.dataset.v); break;
+    case 'undoTx':
+      if (!(await confirmBox('Bu para hareketi geri alınsın mı?', 'Geri al'))) return;
+      lg.tx = lg.tx.filter(x => x.id !== id); save(); render(); toast('Geri alındı');
+      break;
+    case 'cancelBet':
+      if (!(await confirmBox('Kupon iptal edilsin mi?<br><span class="sm mut">Yatırılan para kasaya geri döner.</span>', 'İptal et'))) return;
+      lg.bets = lg.bets.filter(b => b.id !== id); save(); render(); toast('Kupon iptal edildi');
+      break;
+    case 'toggleInLeague': {
+      if (lg.playerIds.includes(id)) {
+        const cnt = lg.matches.filter(m => m.played && (m.home === id || m.away === id)).length;
+        if (!(await confirmBox(`${esc(P(id).name)} bu ligden çıkarılsın mı?${cnt ? `<br><span class="sm mut">Bu ligdeki ${cnt} maçı silinecek.</span>` : ''}`, 'Çıkar'))) return;
+        removePlayerFromLeague(lg, id);
+      } else { addPlayerToLeague(lg, id); toast(lg.format === 'free' ? 'Lige eklendi' : 'Lige eklendi, maçları fikstüre eklendi'); }
+      save(); render(); break;
+    }
+    case 'export': shareText(JSON.stringify(S), 'Puan Tutucu yedeği'); break;
+    case 'import':
+      openSheet(`<h3>Yedeği içe aktar</h3><p class="sm mut">Daha önce dışa aktardığın metni yapıştır. Mevcut veriler değiştirilecek.</p>
+        <textarea id="imp" placeholder='{"players":...}'></textarea><button class="btn block" id="go" style="margin-top:10px">İçe aktar</button>`, s => {
+        s.querySelector('#go').onclick = () => {
+          try {
+            const d = JSON.parse(s.querySelector('#imp').value);
+            if (!Array.isArray(d.players) || !Array.isArray(d.leagues)) throw 0;
+            S = d; save(); closeSheet(); render(); toast('Yedek yüklendi');
+          } catch (err) { toast('Geçersiz yedek metni'); }
+        };
+      });
+      break;
+  }
+});
+
+document.addEventListener('change', e => {
+  const k = e.target.dataset.ch;
+  if (k) { ui[k] = e.target.value; render(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'newPlayer') addPlayer(); });
+
+function addPlayer() {
+  const inp = $('#newPlayer'); const n = inp.value.trim();
+  if (!n) return;
+  if (S.players.some(p => p.name.toLocaleLowerCase('tr') === n.toLocaleLowerCase('tr'))) return toast('Bu isim zaten var');
+  const used = S.players.map(p => p.color);
+  const p = { id: uid(), name: n, color: COLORS.find(c => !used.includes(c)) || COLORS[S.players.length % COLORS.length] };
+  S.players.push(p);
+  const lg = L(); if (lg) addPlayerToLeague(lg, p.id);
+  save(); render(); toast(`${n} eklendi`);
+  setTimeout(() => $('#newPlayer')?.focus(), 30);
+}
+
+// Android back button
+const AppPlugin = window.Capacitor?.Plugins?.App;
+if (AppPlugin) AppPlugin.addListener('backButton', () => {
+  if (ui.sheet) closeSheet();
+  else if (ui.tab !== 'table') { ui.tab = 'table'; render(); }
+  else AppPlugin.exitApp();
+});
+
+if (S.activeLeagueId && !L()) S.activeLeagueId = S.leagues.at(-1)?.id || null;
+if (!S.players.length) ui.tab = 'players';
+render();
+</script>
+</body>
+</html>
